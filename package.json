@@ -1,0 +1,16 @@
+{
+  "name": "mypuppeteer",
+  "version": "1.0.0",
+  "description": "auto test for front with node",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "author": "loVeAsuka",
+  "license": "ISC",
+  "dependencies": {
+    "bufferutil": "^4.0.1",
+    "puppeteer": "^3.0.2",
+    "utf-8-validate": "^5.0.2"
+  }
+}
