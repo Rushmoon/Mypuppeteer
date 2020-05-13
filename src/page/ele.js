@@ -1,4 +1,9 @@
 const puppeteer = require('puppeteer');
+/*tip
+1.page.click(selector,{button:right}) 这个button:right 指的居然是鼠标右击。。。。醉了
+  click的方法在实现上还是模拟的真实鼠标点击，所以注意代码可以点透，但真实情况不可以
+* */
+
 
 (async () => {
     const browser = await puppeteer.launch(
