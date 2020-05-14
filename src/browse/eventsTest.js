@@ -34,7 +34,6 @@ const puppeteer = require('puppeteer');
     * tip
     * 1.page.waitForNavigation()  a.如果时间不确定的话，就使用timeout：0 注意不要加载过于复杂的页面，会有很长时间的加载时间。百度搜索加载了10分钟没出来。。。。
     *                             b.page.waitForNavigation 的参数如果不写的话，就会传输默认的值，所以理论上是都要传的，你不传，他就自己传
-    *
     * */
     browser.on('targetchanged',changeEvent);
     browser.on('disconnected',disconnectEvent);

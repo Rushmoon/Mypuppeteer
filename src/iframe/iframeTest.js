@@ -1,12 +1,14 @@
 const puppeteer = require('puppeteer');
-const readline = reuquire('readline');
+const readline = require('readline');
 const URL = 'http://10.10.18.229:8809';
 (async () => {
     const browser = await puppeteer.launch(
         {
             //当使用自己下载的chromium的时候使用的
             executablePath: '../../Chromium/chrome-win/chrome.exe',
-            headless: false,
+            headless: true,
+            //取消大片空白
+            defaultViewport: null,
             args:[`--window-size=${1280},${680}`],
         }
     );
@@ -18,10 +20,11 @@ const URL = 'http://10.10.18.229:8809';
     await page.$eval('#password',inputDom=> inputDom.value = '');
     await page.$eval('#password',inputDom=> inputDom.value = '1234qwer');
     await page.click('#loginBtn');
-    await page.waitForSelector('.nc-workbench-allAppsBtn.nc-workbench-icon-close');
+    await page.waitFor(3000);
+    await page.waitForSelector('.nc-workbench-allAppsBtn');
     // ant-select-selection-selected-value
-    let groupContent =await page.$('.ant-select-selection-selected-value');
-    let dbName = await page.evaluate(dom=> dom.innerHTML,groupContent);
+    const groupContent =await page.$('.ant-select-selection-selected-value');
+    const dbName = await page.evaluate(dom=> dom.innerHTML,groupContent);
     if(dbName){
         console.log('登录成功！！进入总集团',dbName);
     }
@@ -42,12 +45,48 @@ const URL = 'http://10.10.18.229:8809';
     //
     await page.click('.nc-workbench-allAppsBtn.nc-workbench-icon-close');
     await page.waitForSelector('.result-group-list');
+    await page.waitFor(2000);
     /*调出菜单*/
-
-
-
-
-    /*退出登录*/
+    /*尝试去使用$$和evaluate去配合 来完成对元素的查找，事实证明没搞懂。。。
+    let mapList = await page.$$('.result-group-list');
+    let contentResult = await page.evaluate(Arr=> {
+        let resultDom = null;
+        Arr.map(item=>{
+            console.log(item.firstChild);
+            if(item.firstChild.lastChild.innerHTML === "人力资本"){
+                resultDom = item.lastChild
+            }
+        });
+         return resultDom
+    },mapList);
+    */
+    /*emmm没关系，我们先试试这个$$eval*/
+    const HRIndex = await page.$$eval('div.result-group-list h4.result-header span.result-header-name',nodeList=>{
+        let result  = -1;
+        for (var i=0;i<nodeList.length;i++){
+            if(nodeList[i].innerHTML === "人力资本"){
+                result = i;
+            }
+        }
+        return result + 1
+    });
+    console.log('获取人力资本的index！',HRIndex);
+    page.click("div.result-group-list:nth-child("+HRIndex+") .result-app-list .app-col:nth-child(3) .list-item-content");
+    await page.waitFor(2000);
+    let startDate = new Date();
+    console.log("开始时间"+startDate.getHours()+":"+startDate.getMinutes());
+    await Promise.all(
+        [page.waitForNavigation({'timeout':0,"waitUntil":"networkidle0"}),
+            page.click(".content div.content-item .content-item-content .item-app")
+            ]
+    ).catch(err=>{
+        console.error(err)
+    });
+    await page.waitFor(2000);
+    // const tableLength = await page.$$eval('table tbody.u-table-tbody tr.u-table-row',table=>table.index);
+    let currentDate = new Date();
+    console.log("结束时间"+currentDate.getHours()+":"+currentDate.getMinutes());
+    /*退出登录
     //当为主界面的时候用的登出方式
     //     await page.click('.ant-drawer-mask',{button:'right'});
         await page.click('.avatar_container');
@@ -63,6 +102,8 @@ const URL = 'http://10.10.18.229:8809';
     await page.waitFor(500);
     await page.click('button.u-button.ant-tooltip-open.nc-button-wrapper.button-primary');
     console.log(name+'注销账号登出集团',dbName);
+    await page.waitFor(500);
+     */
     /*
     //参考代码
     await page.waitForSelector('#content_left');
